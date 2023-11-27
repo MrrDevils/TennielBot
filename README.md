@@ -1,8 +1,8 @@
-# TennielBot-Beta
+# TennielBot
 
 Welcome to TennielBot, a discord bot made for the game Arcaea. Mostly made for private use, but you are welcomed to try.
 
-*This is still in development and is missing a lot of features that I'm planning to add. Although, you can join the discord server to use/test the bot for yourself!*
+*This is a running version of the bot, there is another version of this bot that is currently beeing worked on and then passed to this bot, you can check its repo in my account.*
 
 *This bot is heavily inspired by LxBot, which is the biggest reason I made this bot.*
 
