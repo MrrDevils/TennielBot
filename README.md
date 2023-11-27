@@ -13,7 +13,7 @@ TennielBot can **manually** track your scores and automatically calculate your b
 ## Generate B30 Images
 
 Just like lxBot's '/a b30', TennielBot can generate graphical B30 with your scores.
-*Again huge credits to LxBot and the LxBot's developer*
+*Again huge credits to LxBot and the LxBot's developer for the inspiration.*
 
 ## Upload Your Scores
 
@@ -50,4 +50,4 @@ Join the Discord server.
 # Links
 
 - Discord: mrrdevils
-- [Discord Server (Doesn't Exist yet)](https://youtu.be/dQw4w9WgXcQ?si=rJlaKEfJLzQc03-Q)
+- [Discord Server (Not Finished)](https://discord.gg/ea9wP8hptR)
