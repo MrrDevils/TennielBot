@@ -14,7 +14,7 @@ from Extensions.b30 import b30Generate
 from Extensions.register import register, getCode
 
 load_dotenv()
-guilds = 764133488823631872
+guilds = [764133488823631872, 939529907439042600, 701796297799237643]
 recommended_channels = {}
 
 def check_author_is_me(context: lightbulb.Context) -> bool:
@@ -388,4 +388,8 @@ async def autocomplete_chart(
     output = await chart_autocomplete(current_input)
     return output
 
-tenniel.run()
+tenniel.run(status=hikari.Status.ONLINE,
+        activity=hikari.Activity(
+            name="Arcaea",
+            type=hikari.ActivityType.PLAYING,
+        ))
