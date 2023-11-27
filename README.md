@@ -48,3 +48,7 @@ bit of a stretch ik
 ## Suggestions?
 
 Join the Discord server.
+
+# Links
+
+- [Discord (Doesn't Exist yet)](https://youtu.be/dQw4w9WgXcQ?si=rJlaKEfJLzQc03-Q)
