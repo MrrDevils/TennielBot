@@ -6,8 +6,6 @@ Welcome to TennielBot, a discord bot made for the game Arcaea. Mostly made for p
 
 *This bot is heavily inspired by LxBot, which is the biggest reason I made this bot.*
 
-*I am very new to coding and make a lot of newbie mistakes, so I'm also treating this as a learning experiences, if anyone that is experienced notice any mistakes, feel free to notify me.*
-
 # Best 30 Tracking
 
 TennielBot can **manually** track your scores and automatically calculate your best 30 scores so you don't have to use Excel or pay for Arcaea Online.
