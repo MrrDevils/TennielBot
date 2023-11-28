@@ -7,20 +7,27 @@ import time
 from Extensions.search import search
 from Extensions.result import result
 from Extensions.miscellaneous import sideFormat, diffColorFormat
-from Extensions.autocomplete import chart_autocomplete
+from Extensions.autocomplete import chart_autocomplete, reloadAuto
 from Extensions.file_reader import reload
 from Extensions.recommend import generate, regenerate
 from Extensions.b30 import b30Generate
 from Extensions.register import register, getCode
 
 load_dotenv()
-guilds = [764133488823631872, 939529907439042600, 701796297799237643]
+guilds = os.getenv("GUILDS").split(',')
+blacklisted_channels = os.getenv("BLACKLISTED_CHANNELS").split(',')
+me = os.getenv("ME").split(',')
 recommended_channels = {}
 
-def check_author_is_me(context: lightbulb.Context) -> bool:
-    id = context.author.id
-    return id == 432050736722083852 or id == 732195731045220402
+async def check_blacklist(user_id, channel_id = 0):
+    channel_id = str(channel_id)
+    user_id = str(user_id)
+    if channel_id in blacklisted_channels and user_id not in me:
+        return True
+    return False
 
+async def check_is_me(user_id):
+    return user_id in me
 
 tenniel = lightbulb.BotApp(
     token=os.getenv("TOKEN"),
@@ -124,6 +131,15 @@ async def cmd_register(ctx: lightbulb.SlashCommand) -> None:
 @lightbulb.command("song", "Get a song's information.")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
+    channel_id = ctx.channel_id
+    user_id = ctx.author.id
+    if await check_blacklist(user_id, channel_id):
+        await ctx.interaction.create_initial_response(
+                hikari.ResponseType.MESSAGE_CREATE,
+                "This command is not allowed in this channel.",
+                flags=hikari.MessageFlag.EPHEMERAL,
+            )
+        return
     query = ctx.options.chart
     difficulty = ctx.options.difficulty
     try:
@@ -131,7 +147,6 @@ async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
         if output[0] == None:
             raise Exception("Song not found.")
     except Exception as e:
-        print(e)
         embed = hikari.Embed(title=type(e).__name__,description=e.args[0] , color='#cc0000')
         await ctx.interaction.create_initial_response(
                 hikari.ResponseType.MESSAGE_CREATE,
@@ -205,25 +220,33 @@ async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
         return
     
 @tenniel.command
-@lightbulb.option("mode", "Choose the layout",
+@lightbulb.option("layout", "Choose the layout",
                   choices=["LxBot Full", "LxBot Simple", "Official"])
 @lightbulb.command("b30", "Generate your best 30 scores.")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def cmd_b30(ctx: lightbulb.SlashCommand) -> None:
-    mode = ctx.options.mode
+    channel_id = ctx.channel_id
     user_id = ctx.author.id
-    user_name = ctx.author.username
-    print(f'{user_name}: Requested their B30.')
-    if mode in ["LxBot Full", "Official"]:
+    if await check_blacklist(user_id, channel_id):
         await ctx.interaction.create_initial_response(
                 hikari.ResponseType.MESSAGE_CREATE,
-                "Haven't made that yet. Use LxBot Simple.",
+                "This command is not allowed in this channel.",
+                flags=hikari.MessageFlag.EPHEMERAL,
+            )
+        return
+    layout = ctx.options.layout
+    user_name = ctx.author.username
+    print(f'{user_name}: Requested their B30.')
+    if layout in ["LxBot Full", "Official"]:
+        await ctx.interaction.create_initial_response(
+                hikari.ResponseType.MESSAGE_CREATE,
+                "Haven't made that yet lol. Use LxBot Simple.",
                 flags=hikari.MessageFlag.EPHEMERAL,
             )
         return
     await ctx.interaction.create_initial_response(hikari.ResponseType.DEFERRED_MESSAGE_CREATE)
     try:
-        b30 = await b30Generate(user_id, mode)
+        b30 = await b30Generate(user_id, layout)
     except Exception as e:
         print(e)
         embed = hikari.Embed(title=type(e).__name__,description=e.args[0] , color='#cc0000')
@@ -243,8 +266,7 @@ async def cmd_b30(ctx: lightbulb.SlashCommand) -> None:
                   "Show or hide the outcome message.",
                   choices=["True", "False"],
                   required=False,
-                  default="False",
-                  type=bool)
+                  default="False")
 @lightbulb.option("details",
                   "Get Potential details.",
                   choices=["Show", "Hide"],
@@ -265,6 +287,7 @@ async def cmd_b30(ctx: lightbulb.SlashCommand) -> None:
 @lightbulb.command("result", "Calculate the result of a play.")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
+    channel_id = ctx.channel_id
     user_id = ctx.author.id
     user_name = ctx.author.username
     chartStr = ctx.options.chart
@@ -283,7 +306,7 @@ async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
         return
         
     diffStr = ctx.options.difficulty
-    hidden = ctx.options.hidden
+    hidden = bool(ctx.options.hidden)
     details = ctx.options.details
     submit = ctx.options.submit
     try:
@@ -337,7 +360,7 @@ async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
         print(f'{user_name}: Did not save a score for "{song_name}" with the score: {score_str} ({rating})')
         embed.set_author(name="Result (Not saved)")
 
-    if hidden:
+    if hidden and not await check_blacklist(user_id, channel_id):
         await ctx.interaction.create_initial_response(
             hikari.ResponseType.MESSAGE_CREATE,
             embed,
@@ -351,11 +374,19 @@ async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
     return
 
 @tenniel.command
-@lightbulb.add_checks(lightbulb.Check(check_author_is_me))
-@lightbulb.command("reload", "Reload Arcsong. (For development only)")
+# @lightbulb.add_checks(lightbulb.Check(check_author_is_me)) I don't use check.
+@lightbulb.command("reload", "Reload files. (For development only)")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def cmd_reload(ctx: lightbulb.SlashCommand) -> None:
+    if await check_is_me(ctx.author.id):
+        await ctx.interaction.create_initial_response(
+            hikari.ResponseType.MESSAGE_CREATE,
+            "You are not allowed to use this command.",
+            flags=hikari.MessageFlag.EPHEMERAL,
+        )
+        return
     await reload()
+    await reloadAuto()
     await ctx.interaction.create_initial_response(
         hikari.ResponseType.MESSAGE_CREATE,
         hikari.Embed(title="Reloaded", description="Cleared cached files.", color='#eae9e0'),
@@ -367,7 +398,14 @@ async def cmd_reload(ctx: lightbulb.SlashCommand) -> None:
 @lightbulb.command("recommend", "Get a chart recommendation.")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def cmd_recom(ctx: lightbulb.SlashCommand) -> None:
-    channel = ctx.interaction.channel_id
+    channel = ctx.channel_id
+    if await check_blacklist(ctx.author.id, channel):
+        await ctx.interaction.create_initial_response(
+            hikari.ResponseType.MESSAGE_CREATE,
+            "This command is not allowed in this channel.",
+            flags=hikari.MessageFlag.EPHEMERAL,
+        )
+        return
     time_now = time.time()
     output = await generate()
     global recommended_channels

@@ -18,6 +18,25 @@ for song in arcsong['songs']:
     except IndexError:
         pass
 
+async def reloadAuto():
+    arcsong = getArcsong()
+    global past
+    global present
+    global future
+    global beyond
+    past = []
+    present = []
+    future = []
+    beyond = []
+    for song in arcsong['songs']:
+        past.append(song['difficulties'][0])
+        present.append(song['difficulties'][1])
+        future.append(song['difficulties'][2])
+        try:
+            beyond.append(song['difficulties'][3])
+        except IndexError:
+            pass
+        
 async def chart_autocomplete(query):
     
     try:
