@@ -21,8 +21,7 @@ To track your score, all you need is the name of the song, difficulty and of cou
 
 # Viewing Charts Info
 
-Features song names autocomplete and embeds.
-*also, have anyone notice that LxBot seems to stopped updating for new songs (since Abstruce Dilemma?)*
+Features song names autocomplete and embeds with up-to-date data.
 
 
 # Other Features
