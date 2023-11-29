@@ -119,6 +119,7 @@ async def search(query, diff_name):
     
     override = False
     difficulty = 4
+
     try:
         for words in query:
             if process.extractOne(words, beyond)[1] > 90:
@@ -145,6 +146,10 @@ async def search(query, diff_name):
                 difficulty = 3
                 chart = "lasteternity"
                 override = True
+                break
+            elif fuzz.ratio(words.lower(), "misdeed") > 90:
+                chart = "misdeed"
+                override = False
                 break
             else:
                 chart = chart + words

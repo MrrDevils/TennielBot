@@ -7,7 +7,7 @@ import time
 from Extensions.search import search
 from Extensions.result import result
 from Extensions.miscellaneous import sideFormat, diffColorFormat
-from Extensions.autocomplete import chart_autocomplete, reloadAuto
+from Extensions.autocomplete import chart_autocomplete, loadAuto
 from Extensions.file_reader import reload
 from Extensions.recommend import generate, regenerate
 from Extensions.b30 import b30Generate
@@ -386,7 +386,7 @@ async def cmd_reload(ctx: lightbulb.SlashCommand) -> None:
         )
         return
     await reload()
-    await reloadAuto()
+    loadAuto()
     await ctx.interaction.create_initial_response(
         hikari.ResponseType.MESSAGE_CREATE,
         hikari.Embed(title="Reloaded", description="Cleared cached files.", color='#eae9e0'),
