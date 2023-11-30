@@ -33,6 +33,7 @@ tenniel = lightbulb.BotApp(
     token=os.getenv("TOKEN"),
     default_enabled_guilds=guilds,
     intents=hikari.Intents.ALL,
+    prefix="+"
 )
 
 @tenniel.listen()
@@ -48,6 +49,10 @@ async def on_message(ctx: hikari.GuildMessageCreateEvent) -> None:
         await ctx.message.respond(output, reply=True)
     except Exception:
         return
+    
+# prefix command
+@tenniel.command
+
     
 @tenniel.command
 @lightbulb.command("getcode", "Get your code.")
@@ -360,7 +365,7 @@ async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
         print(f'{user_name}: Did not save a score for "{song_name}" with the score: {score_str} ({rating})')
         embed.set_author(name="Result (Not saved)")
 
-    if hidden and not await check_blacklist(user_id, channel_id):
+    if hidden or await check_blacklist(user_id, channel_id):
         await ctx.interaction.create_initial_response(
             hikari.ResponseType.MESSAGE_CREATE,
             embed,
