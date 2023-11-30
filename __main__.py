@@ -50,9 +50,6 @@ async def on_message(ctx: hikari.GuildMessageCreateEvent) -> None:
     except Exception:
         return
     
-# prefix command
-@tenniel.command
-
     
 @tenniel.command
 @lightbulb.command("getcode", "Get your code.")
