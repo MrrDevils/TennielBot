@@ -3,6 +3,9 @@ import time
 import json
 from thefuzz import process
 
+class RevertChanges(Exception):
+    pass
+
 def getArcsong():
     with open ('Assets/arcsong.json', 'r', encoding='utf-8') as json_file:
             arcsong = json.load(json_file)
@@ -473,6 +476,74 @@ def updateGeneral(found_song):
         print("Song update canceled.")
         time.sleep(2)
         return
+    
+def updateAlias(found_song):
+    current_alias = {}
+    for index, alias in enumerate(found_song['alias']):
+        current_alias[index] = alias
+    new_alias = []
+    removed_alias = {}
+    updated = False
+    while True:
+        os.system('cls')
+        print(f"==== Edit {found_song['song_id']} ====")
+        print("Existing aliases:")
+        for key, value in current_alias.items():
+            print(f"{key + 1}: {value}")
+        print()
+        if updated:
+            if len(new_alias) > 0:
+                print("New:")           
+                for alias in new_alias:
+                    print(f"- {alias}")
+            if len(removed_alias) > 0:
+                print("Removed:")
+                for alias in removed_alias:
+                    print(f"- {alias}")
+        print()
+        print("1.  Add alias.")
+        print("2.  Remove alias.")
+        if updated:
+            print("3.  Done.")
+        else: 
+            print("3.  Cancel.")
+        opt = input("Enter your option: ")
+        if opt == '1':
+            while True:
+                temp = input("Enter an alias (0 to finish): ")
+                if temp == '0':
+                    break
+                new_alias.append(temp)
+                updated = True
+        elif opt == '2':
+            while True:
+                temp = input("Enter an index to remove (0 to finish): ")
+                if temp == '0':
+                    break
+                temp = int(temp) - 1
+                try:
+                    removed_alias.append(current_alias[temp])
+                except KeyError:
+                    print("Invalid index.")
+                    continue
+                removed_alias.append(current_alias[temp])
+                updated = True
+        elif opt == '3':
+            if not updated:
+                break
+            for delete_index in removed_alias:
+                current_alias.remove(delete_index)
+            index_num = len(current_alias) + 1
+            for i in len(new_alias):
+                current_alias[index_num + i] = new_alias[i]
+                
+            print("Final Changes: ")
+            for key, value in current_alias.items():
+                print(f"{key + 1}: {value}")
+            if get_bool("Confirm? (y/n): "):
+                pass
+            time.sleep(2)
+            return
         
 def updateSong():
     while True:
@@ -495,11 +566,16 @@ def updateSong():
         print("\n1. Update general data.")
         print("2. Update alias data.")
         print("3. Update difficulty data.")
-        print("4. Add another difficulty.")
-        print("5. Cancel.")
+        print("4. Cancel.")
         opt = input("Enter your option: ")
         if opt == '1':
             updateGeneral(found_song)
+        elif opt == '2':
+            updateAlias(found_song)
+        elif opt == '3':
+            pass
+        elif opt == '4':
+            return
         break
         
 
