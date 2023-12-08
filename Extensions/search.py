@@ -171,6 +171,18 @@ async def search(query, diff_name):
         return 1, output, difficulty
         
 async def searchConstant(constant):
+    """
+    Asynchronously searches for songs with a specific constant.
+
+    Args:
+        constant (float): The constant value to search for.
+
+    Returns:
+        list: A list of dictionaries containing the song information matching the constant.
+
+    Raises:
+        InvalidConstantError: If no charts are found with the specified constant.
+    """
     arcsong = getArcsong()
     found_song = []
     minSearch = 0
@@ -193,6 +205,18 @@ async def searchConstant(constant):
     return found_song
         
 async def searchChart(query):
+    """
+    Retrieves information about a song based on a search query.
+
+    Parameters:
+        query (str): The search query to retrieve the song information.
+        
+    Returns:
+        dict: A dictionary containing information about the song, including the song ID, name (in English and Japanese), artist, jacket designer, BPM, side, pack, time, and difficulties. The difficulties are represented as a list of dictionaries, each containing the difficulty level, rating, and difficulty name. The jacket path is also included in the dictionary.
+        
+    Raises:
+        AprilFoolsChartException: If the song ID is found in the April Fools chart and cannot be retrieved.
+    """
     chart = await getSongId(query)
     if chart['song_id'] in AF:
         raise AprilFoolsChartException
@@ -247,6 +271,20 @@ async def searchChart(query):
     return song
 
 async def searchDiff(query, diff, skip = False):
+    """
+    Asynchronously searches for a song with the given query and difficulty and returns information about the song's difficulty.
+
+    Args:
+        query (str): The query used to search for the song.
+        diff (int): The difficulty level of the song.
+        skip (bool, optional): Whether to skip the search and use the provided query directly. Defaults to False.
+
+    Raises:
+        DiffNotFoundError: If the specified difficulty level is invalid.
+
+    Returns:
+        dict: A dictionary containing information about the song, including its ID, name, artist, difficulty, rating, side, BPM, set, chart designer, jacket path, note count, and duration.
+    """
     if not skip:
         chart = await getSongId(query)
         if chart['song_id'] in AF:

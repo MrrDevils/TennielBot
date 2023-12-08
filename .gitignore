@@ -172,3 +172,5 @@ cython_debug/
 # Built Visual Studio Code Extensions
 *.vsix
 Extensions/tempCodeRunnerFile.py
+Extensions/Python Extensions/manage.py
+Extensions/manage_cli.py

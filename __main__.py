@@ -7,8 +7,8 @@ import time
 from Extensions.search import search
 from Extensions.result import result
 from Extensions.miscellaneous import sideFormat, diffColorFormat
-from Extensions.autocomplete import chart_autocomplete, loadAuto
-from Extensions.file_reader import reload
+from Extensions.autocomplete import chart_autocomplete, load_auto
+from Extensions.file_reader import reload_data
 from Extensions.recommend import generate, regenerate
 from Extensions.b30 import b30Generate
 from Extensions.register import register, getCode
@@ -35,6 +35,8 @@ tenniel = lightbulb.BotApp(
     intents=hikari.Intents.ALL,
     prefix="+"
 )
+
+tenniel.load_extensions_from("Extensions/Python Extensions")
 
 @tenniel.listen()
 async def on_message(ctx: hikari.GuildMessageCreateEvent) -> None:
@@ -133,6 +135,18 @@ async def cmd_register(ctx: lightbulb.SlashCommand) -> None:
 @lightbulb.command("song", "Get a song's information.")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
+    """
+    Executes the slash command "song" to get information about a song.
+    
+    Parameters:
+        ctx (lightbulb.SlashCommand): The context object representing the slash command.
+    
+    Returns:
+        None: This function does not return anything.
+        
+    Raises:
+        Exception: If the song is not found.
+    """
     channel_id = ctx.channel_id
     user_id = ctx.author.id
     if await check_blacklist(user_id, channel_id):
@@ -227,6 +241,15 @@ async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
 @lightbulb.command("b30", "Generate your best 30 scores.")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def cmd_b30(ctx: lightbulb.SlashCommand) -> None:
+    """
+    Command to generate the user's best 30 scores.
+    
+    Parameters:
+        ctx (lightbulb.SlashCommand): The context object representing the slash command.
+        
+    Returns:
+        None
+    """
     channel_id = ctx.channel_id
     user_id = ctx.author.id
     if await check_blacklist(user_id, channel_id):
@@ -289,6 +312,27 @@ async def cmd_b30(ctx: lightbulb.SlashCommand) -> None:
 @lightbulb.command("result", "Calculate the result of a play.")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
+    """
+    Calculate the result of a play.
+
+    Args:
+        ctx (lightbulb.SlashCommand): The context object for the command.
+
+    Returns:
+        None: This function does not return anything.
+
+    Raises:
+        Exception: If an error occurs during the execution of the command.
+
+    Command Options:
+        - chart (str): Enter the song name. (autocomplete enabled)
+        - score (str): Enter the score for the song.
+        - difficulty (str): Enter the difficulty of the song. (choices: ['Past', 'Present', 'Future', 'Beyond'])
+        - hidden (str): Show or hide the outcome message. (choices: ['True', 'False'], default: 'False')
+        - details (str): Get Potential details. (choices: ['Show', 'Hide'], default: 'Hide')
+        - submit (str): Save the score to your B30. (choices: ['Save', "Don't save"], default: 'Save')
+
+    """
     channel_id = ctx.channel_id
     user_id = ctx.author.id
     user_name = ctx.author.username
@@ -308,7 +352,7 @@ async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
         return
         
     diffStr = ctx.options.difficulty
-    hidden = bool(ctx.options.hidden)
+    hidden = ctx.options.hidden
     details = ctx.options.details
     submit = ctx.options.submit
     try:
@@ -362,7 +406,7 @@ async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
         print(f'{user_name}: Did not save a score for "{song_name}" with the score: {score_str} ({rating})')
         embed.set_author(name="Result (Not saved)")
 
-    if hidden or await check_blacklist(user_id, channel_id):
+    if hidden == "True" or await check_blacklist(user_id, channel_id):
         await ctx.interaction.create_initial_response(
             hikari.ResponseType.MESSAGE_CREATE,
             embed,
@@ -387,8 +431,8 @@ async def cmd_reload(ctx: lightbulb.SlashCommand) -> None:
             flags=hikari.MessageFlag.EPHEMERAL,
         )
         return
-    await reload()
-    loadAuto()
+    await reload_data()
+    load_auto()
     await ctx.interaction.create_initial_response(
         hikari.ResponseType.MESSAGE_CREATE,
         hikari.Embed(title="Reloaded", description="Cleared cached files.", color='#eae9e0'),

@@ -1,0 +1,54 @@
+import unittest
+import asyncio
+
+
+
+async def convert_time_to_seconds(time_str) -> int:
+    if ':' not in time_str:
+        try:
+            return int(time_str)
+        except ValueError:
+            return 0
+        
+    parts = time_str.split(':')
+    
+    if len(parts) != 2:
+        return 0
+    
+    try:
+        minutes = int(parts[0])
+        seconds = int(parts[1])
+        total_seconds = minutes * 60 + seconds
+        return total_seconds
+    except ValueError:
+        return 0
+
+class TestConvertTimeToSeconds(unittest.TestCase):
+
+    async def test_no_colon(self):
+        time_str = '123'
+        result = await convert_time_to_seconds(time_str)
+        self.assertEqual(result, 123)
+
+    async def test_valid_integer(self):
+        time_str = '456'
+        result = await convert_time_to_seconds(time_str)
+        self.assertEqual(result, 456)
+
+    async def test_invalid_parts(self):
+        time_str = '12:34:56'
+        result = await convert_time_to_seconds(time_str)
+        self.assertEqual(result, 0)
+
+    async def test_valid_parts(self):
+        time_str = '12:34'
+        result = await convert_time_to_seconds(time_str)
+        self.assertEqual(result, 754)
+
+    async def test_valid_parts_with_invalid_integer(self):
+        time_str = '12:34a'
+        result = await convert_time_to_seconds(time_str)
+        self.assertEqual(result, 0)
+
+if __name__ == '__main__':
+    asyncio.run(unittest.main())

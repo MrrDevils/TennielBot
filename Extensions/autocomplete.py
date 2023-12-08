@@ -1,20 +1,21 @@
 from .file_reader import getArcsong
-import json
 
-
-class InvalidConstantError(ValueError):
+class InvalidConstantException(ValueError):
     pass
 
 
-past = []
-present = []
-future = []
-beyond = []
+global_past = []
+global_present = []
+global_future = []
+global_beyond = []
 featured = [
-    "FANTA5Y",
-    "Nameless Passion",
-    "TeraVolt",
-    "Trasient Space"
+    "Ouvertüre",
+    "Stratoliner",
+    "eden",
+    "XTREME",
+    "Meta-Mysteria",
+    "Wish Upon a Snow",
+    "Alone & Lorn"
 ]
 quon_mapping = [
     "Quon (Feryquitous)",
@@ -68,76 +69,76 @@ specials = [
     }
 ]
 
-def loadAuto():
+def load_auto():
     arcsong = getArcsong()
-    global past
-    global present
-    global future
-    global beyond
-    past = []
-    present = []
-    future = []
-    beyond = []
+    global_past = []
+    global_present = []
+    global_future = []
+    global_beyond = []
+    
     for song in arcsong['songs']:
-        past.append(song['difficulties'][0])
-        present.append(song['difficulties'][1])
-        future.append(song['difficulties'][2])
-        try:
-            beyond.append(song['difficulties'][3])
-        except IndexError:
-            pass
+        global_past.append(song['difficulties'][0])
+        global_present.append(song['difficulties'][1])
+        global_future.append(song['difficulties'][2])
+        
+        if len(song['difficulties']) > 3:
+            global_beyond.append(song['difficulties'][3])
 
-loadAuto()
+load_auto()
 
 async def chart_autocomplete(query):
-
     if query == "":
         return featured
 
     try:
         cc = float(query)
         if cc < 1.0 or cc > 12.0:
-            raise InvalidConstantError
-        found = 0
+            raise InvalidConstantException
 
         found_songs = []
 
         if cc >= 7.0:
-            for chart in future:
-                if cc == chart['rating'] / 10:
-                    name = f"{chart['name_en']} (Future)"
-                    found_songs.append(name)
-                    found += 1
+            future = global_future
+            beyond = global_beyond
+            found_songs += [
+                f"{chart['name_en']} (Future)" 
+                for chart in future 
+                if cc == chart['rating'] / 10
+            ]
 
-            for chart in beyond:
-                if cc == chart['rating'] / 10:
-                    name = f"{chart['name_en']} (Beyond)"
-                    found_songs.append(name)
-                    found += 1
+            found_songs += [
+                f"{chart['name_en']} (Beyond)"
+                for chart in beyond
+                if cc == chart['rating'] / 10
+            ]
 
         if cc < 10.0:
-            for chart in past:
-                if cc == chart['rating'] / 10:
-                    name = f"{chart['name_en']} (Past)"
-                    found_songs.append(name)
-                    found += 1
+            past = global_past
+            present = global_present
 
-            for chart in present:
-                if cc == chart['rating'] / 10:
-                    name = f"{chart['name_en']} (Present)"
-                    found_songs.append(name)
-                    found += 1
+            found_songs += [
+                f"{chart['name_en']} (Past)"
+                for chart in past
+                if cc == chart['rating'] / 10
+            ]
+
+            found_songs += [
+                f"{chart['name_en']} (Present)"
+                for chart in present
+                if cc == chart['rating'] / 10
+            ]
 
         return found_songs[:25]
-    except InvalidConstantError:
-        return None
+
+    except InvalidConstantException:
+        pass
     except ValueError:
         pass
-    query = query.lower()
-    query = query.replace(" ", "")
-    found_songs = []
-    found = 0
+
+    query = query.lower().replace(" ", "")
     quon_idex = 0
+    found_songs = []
+    
     for chart in future:
         if query in chart["name_en"].lower().replace(" ", ""):
             name = chart["name_en"]
@@ -145,15 +146,15 @@ async def chart_autocomplete(query):
                 name = quon_mapping[quon_idex]
                 quon_idex += 1
             found_songs.append(name)
-            found += 1
-            if found == 15:
-                return found_songs[:15]
+            if len(found_songs) == 15:
+                return found_songs
+
     for special in specials:
         for alias in special["alias"]:
             if query in alias:
                 found_songs.append(special["title"])
-                found += 1
-                if found == 15:
-                    return found_songs[:15]
+                if len(found_songs) == 15:
+                    return found_songs
                 break
+
     return found_songs[:15]
