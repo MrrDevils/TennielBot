@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import hikari
 import lightbulb
+# import miru
 import time
 from Extensions.search import search
 from Extensions.result import result
@@ -19,12 +20,14 @@ blacklisted_channels = os.getenv("BLACKLISTED_CHANNELS").split(',')
 me = os.getenv("ME").split(',')
 recommended_channels = {}
 
-async def check_blacklist(user_id, channel_id = 0):
+
+async def check_blacklist(user_id, channel_id=0):
     channel_id = str(channel_id)
     user_id = str(user_id)
     if channel_id in blacklisted_channels and user_id not in me:
         return True
     return False
+
 
 async def check_is_me(user_id):
     return user_id in me
@@ -36,7 +39,9 @@ tenniel = lightbulb.BotApp(
     prefix="+"
 )
 
+
 tenniel.load_extensions_from("Extensions/Python Extensions")
+
 
 @tenniel.listen()
 async def on_message(ctx: hikari.GuildMessageCreateEvent) -> None:
@@ -51,8 +56,8 @@ async def on_message(ctx: hikari.GuildMessageCreateEvent) -> None:
         await ctx.message.respond(output, reply=True)
     except Exception:
         return
-    
-    
+
+
 @tenniel.command
 @lightbulb.command("getcode", "Get your code.")
 @lightbulb.implements(lightbulb.SlashCommand)
@@ -61,21 +66,24 @@ async def cmd_get_code(ctx: lightbulb.SlashCommand) -> None:
     try:
         code = await getCode(user_id)
     except Exception as e:
-        embed = hikari.Embed(title=type(e).__name__,description=e.args[0] , color='#cc0000')
+        embed = hikari.Embed(title=type(e).__name__,
+                             description=e.args[0], color='#cc0000')
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                embed,
-                flags=hikari.MessageFlag.EPHEMERAL,
-            )
-        return
-    embed = hikari.Embed(title="Here's your code.", description=code, color='#00cc00')
-    await ctx.interaction.create_initial_response(
             hikari.ResponseType.MESSAGE_CREATE,
             embed,
             flags=hikari.MessageFlag.EPHEMERAL,
         )
+        return
+    embed = hikari.Embed(title="Here's your code.",
+                         description=code, color='#00cc00')
+    await ctx.interaction.create_initial_response(
+        hikari.ResponseType.MESSAGE_CREATE,
+        embed,
+        flags=hikari.MessageFlag.EPHEMERAL,
+    )
     return
-    
+
+
 @tenniel.command
 @lightbulb.option("name", "Add a custom name. (not required)",
                   default="",
@@ -98,29 +106,32 @@ async def cmd_register(ctx: lightbulb.SlashCommand) -> None:
     try:
         output = await register(user_id, name, code)
     except Exception as e:
-        embed = hikari.Embed(title=type(e).__name__,description=e.args[0] , color='#cc0000')
+        embed = hikari.Embed(title=type(e).__name__,
+                             description=e.args[0], color='#cc0000')
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                embed,
-                flags=hikari.MessageFlag.EPHEMERAL,
-            )
-        return
-    print(f'{user_name}: Registered as "{name}" with code: {code}')
-    if output == 0:
-        embed = hikari.Embed(title="Success!", description="Successfully registered to an existing code.", color='#00cc00')
-        await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                embed,
-                flags=hikari.MessageFlag.EPHEMERAL,
-            )
-        return
-    new_code = output
-    embed = hikari.Embed(title="Success!", description=f"Successfully registered. Your code is {new_code}.", color="#00cc00")
-    await ctx.interaction.create_initial_response(
             hikari.ResponseType.MESSAGE_CREATE,
             embed,
             flags=hikari.MessageFlag.EPHEMERAL,
         )
+        return
+    print(f'{user_name}: Registered as "{name}" with code: {code}')
+    if output == 0:
+        embed = hikari.Embed(
+            title="Success!", description="Successfully registered to an existing code.", color='#00cc00')
+        await ctx.interaction.create_initial_response(
+            hikari.ResponseType.MESSAGE_CREATE,
+            embed,
+            flags=hikari.MessageFlag.EPHEMERAL,
+        )
+        return
+    new_code = output
+    embed = hikari.Embed(
+        title="Success!", description=f"Successfully registered. Your code is {new_code}.", color="#00cc00")
+    await ctx.interaction.create_initial_response(
+        hikari.ResponseType.MESSAGE_CREATE,
+        embed,
+        flags=hikari.MessageFlag.EPHEMERAL,
+    )
     return
 
 
@@ -137,13 +148,13 @@ async def cmd_register(ctx: lightbulb.SlashCommand) -> None:
 async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
     """
     Executes the slash command "song" to get information about a song.
-    
+
     Parameters:
         ctx (lightbulb.SlashCommand): The context object representing the slash command.
-    
+
     Returns:
         None: This function does not return anything.
-        
+
     Raises:
         Exception: If the song is not found.
     """
@@ -151,10 +162,10 @@ async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
     user_id = ctx.author.id
     if await check_blacklist(user_id, channel_id):
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                "This command is not allowed in this channel.",
-                flags=hikari.MessageFlag.EPHEMERAL,
-            )
+            hikari.ResponseType.MESSAGE_CREATE,
+            "This command is not allowed in this channel.",
+            flags=hikari.MessageFlag.EPHEMERAL,
+        )
         return
     query = ctx.options.chart
     difficulty = ctx.options.difficulty
@@ -163,14 +174,15 @@ async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
         if output[0] == None:
             raise Exception("Song not found.")
     except Exception as e:
-        embed = hikari.Embed(title=type(e).__name__,description=e.args[0] , color='#cc0000')
+        embed = hikari.Embed(title=type(e).__name__,
+                             description=e.args[0], color='#cc0000')
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                embed,
-                flags=hikari.MessageFlag.EPHEMERAL,
-            )
+            hikari.ResponseType.MESSAGE_CREATE,
+            embed,
+            flags=hikari.MessageFlag.EPHEMERAL,
+        )
         return
-    if output[0] == 0: # Song Search
+    if output[0] == 0:  # Song Search
         chart = output[1]
         jacket = hikari.File(chart['jacket_path'])
         side_output = await sideFormat(chart['side'])
@@ -185,19 +197,19 @@ async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
             field += f"- {difficulty['difficulty_name']} {difficulty['difficulty']}: {difficulty['rating']}\n"
         footer = f'Enter /song {chart["song_id"]} <difficulty> to get difficulty details.'
         embed = hikari.Embed(color=color,
-                            title=f'**{chart["name_en"]}**',
-                            description=description)
+                             title=f'**{chart["name_en"]}**',
+                             description=description)
         embed.set_author(name="Chart Details")
         embed.set_footer(text=footer)
         embed.set_image(jacket)
         embed.add_field(name="Difficulties", value=field, inline=False)
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                embed
+            hikari.ResponseType.MESSAGE_CREATE,
+            embed
         )
-        
+
         return
-    elif output[0] == 1: # Difficulty Search
+    elif output[0] == 1:  # Difficulty Search
         chart = output[1]
         jacket = hikari.File(chart['jacket_path'])
         side = await sideFormat(chart['side'])
@@ -208,17 +220,18 @@ async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
         description += f'**Artist:** {chart["artist"]}\n**Illustration:** {chart["jacket_designer"]}\n**Duration:** {chart["time"]}\n**BPM:** {chart["bpm"]}\n**Side:** {side[0]}\n**Pack:** {chart["set_friendly"]}'
         field = f'**CC:** {chart["rating"]}\n**Chart Design:** {chart["chart_designer"]}\n**Notes:** {chart["note"]}'
         embed = hikari.Embed(color=color,
-                            title=f'**{chart["name_en"]}**',
-                            description=description)
+                             title=f'**{chart["name_en"]}**',
+                             description=description)
         embed.set_author(name="Chart Details")
         embed.set_image(jacket)
-        embed.add_field(name=f'{chart["difficulty_name"]} {chart["difficulty"]}', value=field)
+        embed.add_field(
+            name=f'{chart["difficulty_name"]} {chart["difficulty"]}', value=field)
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                embed
+            hikari.ResponseType.MESSAGE_CREATE,
+            embed
         )
         return
-    elif output[0] == 2: # Constant Search
+    elif output[0] == 2:  # Constant Search
         songs = output[1]
         chart = ''
         title = 'Songs Found'
@@ -229,12 +242,13 @@ async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
         embed = hikari.Embed(title=title, description=chart, color='#eae9e0')
         embed.set_author(name=str(float(query)))
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                embed,
-                flags=hikari.MessageFlag.EPHEMERAL,
+            hikari.ResponseType.MESSAGE_CREATE,
+            embed,
+            flags=hikari.MessageFlag.EPHEMERAL,
         )
         return
-    
+
+
 @tenniel.command
 @lightbulb.option("layout", "Choose the layout",
                   choices=["LxBot Full", "LxBot Simple", "Official"])
@@ -243,10 +257,10 @@ async def cmd_song(ctx: lightbulb.SlashCommand) -> None:
 async def cmd_b30(ctx: lightbulb.SlashCommand) -> None:
     """
     Command to generate the user's best 30 scores.
-    
+
     Parameters:
         ctx (lightbulb.SlashCommand): The context object representing the slash command.
-        
+
     Returns:
         None
     """
@@ -254,27 +268,28 @@ async def cmd_b30(ctx: lightbulb.SlashCommand) -> None:
     user_id = ctx.author.id
     if await check_blacklist(user_id, channel_id):
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                "This command is not allowed in this channel.",
-                flags=hikari.MessageFlag.EPHEMERAL,
-            )
+            hikari.ResponseType.MESSAGE_CREATE,
+            "This command is not allowed in this channel.",
+            flags=hikari.MessageFlag.EPHEMERAL,
+        )
         return
     layout = ctx.options.layout
     user_name = ctx.author.username
     print(f'{user_name}: Requested their B30.')
-    if layout in ["LxBot Full", "Official"]:
+    if layout in ["0", "2"]:
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                "Haven't made that yet lol. Use LxBot Simple.",
-                flags=hikari.MessageFlag.EPHEMERAL,
-            )
+            hikari.ResponseType.MESSAGE_CREATE,
+            "Haven't made that yet lol. Use LxBot Simple.",
+            flags=hikari.MessageFlag.EPHEMERAL,
+        )
         return
     await ctx.interaction.create_initial_response(hikari.ResponseType.DEFERRED_MESSAGE_CREATE)
     try:
         b30 = await b30Generate(user_id, layout)
     except Exception as e:
         print(e)
-        embed = hikari.Embed(title=type(e).__name__,description=e.args[0] , color='#cc0000')
+        embed = hikari.Embed(title=type(e).__name__,
+                             description=e.args[0], color='#cc0000')
         await ctx.interaction.edit_initial_response(embed)
         await sleep(5)
         await ctx.interaction.delete_initial_response()
@@ -284,7 +299,7 @@ async def cmd_b30(ctx: lightbulb.SlashCommand) -> None:
     embed.set_author(name='Inquiry Result')
     embed.set_image(f)
     await ctx.interaction.edit_initial_response(embed)
-    
+
 
 @tenniel.command
 @lightbulb.option("hidden",
@@ -345,12 +360,13 @@ async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
             raise Exception("InvalidScoreError")
     except Exception:
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                hikari.Embed(title="InvalidScoreError", description="Please enter a valid score.", color='#cc0000'),
-                flags=hikari.MessageFlag.EPHEMERAL,
-            )
+            hikari.ResponseType.MESSAGE_CREATE,
+            hikari.Embed(title="InvalidScoreError",
+                         description="Please enter a valid score.", color='#cc0000'),
+            flags=hikari.MessageFlag.EPHEMERAL,
+        )
         return
-        
+
     diffStr = ctx.options.difficulty
     hidden = ctx.options.hidden
     details = ctx.options.details
@@ -359,12 +375,13 @@ async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
         output = await result(chartStr, diffStr, score, user_id, submit)
     except Exception as e:
         print(e)
-        embed = hikari.Embed(title=type(e).__name__,description=e.args[0] , color='#cc0000')
+        embed = hikari.Embed(title=type(e).__name__,
+                             description=e.args[0], color='#cc0000')
         await ctx.interaction.create_initial_response(
-                hikari.ResponseType.MESSAGE_CREATE,
-                embed,
-                flags=hikari.MessageFlag.EPHEMERAL,
-            )
+            hikari.ResponseType.MESSAGE_CREATE,
+            embed,
+            flags=hikari.MessageFlag.EPHEMERAL,
+        )
         return
     song_name = output["name_en"]
     diff_name = output["difficulty"]
@@ -376,34 +393,41 @@ async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
     new_ptt = output["new_ptt"]
     has_improved = output["has_improved"]
     rank = output["play_rank"]
+    is_pm = output["is_pm"]
+    pm_minus = output["pm_minus"]
     color = await diffColorFormat(output["diff_index"])
     jacket = hikari.File(jacket_path)
-    embed = hikari.Embed(color=color,
-                        description=f'**{song_name}**\n{score_str}\n{diff_name} {cc} > {rating}')
+    if not is_pm or pm_minus == 0:
+        embed = hikari.Embed(color=color,
+                             description=f'**{song_name}**\n{score_str}\n{diff_name} {cc} > {rating}')
+    else:
+        embed = hikari.Embed(color=color,
+                             description=f'**{song_name}**\n{score_str} (MPM {pm_minus})\n{diff_name} {cc} > {rating}')
     embed.set_thumbnail(jacket)
     if submit == "Save":
-        print(f'{user_name}: Saved a score for "{song_name}" with the score: {score_str} ({rating})')
+        print(
+            f'{user_name}: Saved a score for "{song_name}" with the score: {score_str} ({rating})')
         if details == "Show" and cc > 0:
             if has_improved:
                 embed.add_field(
                     name="Details",
-                    value=
-                    f"This score is now your top **#{rank}** score.\nBest 30 average: {old_ptt} > **{new_ptt}**."
+                    value=f"This score is now your top **#{rank}** score.\nBest 30 average: {old_ptt} > **{new_ptt}**."
                 )
             else:
                 embed.add_field(
                     name="Details",
-                    value=
-                    f"This score did not make it to your Best 30 scores.\nBest 30 average: **{new_ptt}**."
+                    value=f"This score did not make it to your Best 30 scores.\nBest 30 average: **{new_ptt}**."
                 )
         if cc > 0:
             embed.set_author(name="Result")
         elif cc == 0:
             embed.set_author(name="Not saved. Chart costant is unavailable.")
         else:
-            embed.set_author(name="Not saved. This chart cannot give Potential.")
+            embed.set_author(
+                name="Not saved. This chart cannot give Potential.")
     else:
-        print(f'{user_name}: Did not save a score for "{song_name}" with the score: {score_str} ({rating})')
+        print(
+            f'{user_name}: View a score for "{song_name}" with the score: {score_str} ({rating})')
         embed.set_author(name="Result (Not saved)")
 
     if hidden == "True" or await check_blacklist(user_id, channel_id):
@@ -414,13 +438,13 @@ async def cmd_result(ctx: lightbulb.SlashCommand) -> None:
         )
         return
     await ctx.interaction.create_initial_response(
-            hikari.ResponseType.MESSAGE_CREATE,
-            embed,
+        hikari.ResponseType.MESSAGE_CREATE,
+        embed,
     )
     return
 
+
 @tenniel.command
-# @lightbulb.add_checks(lightbulb.Check(check_author_is_me)) I don't use check.
 @lightbulb.command("reload", "Reload files. (For development only)")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def cmd_reload(ctx: lightbulb.SlashCommand) -> None:
@@ -435,10 +459,12 @@ async def cmd_reload(ctx: lightbulb.SlashCommand) -> None:
     load_auto()
     await ctx.interaction.create_initial_response(
         hikari.ResponseType.MESSAGE_CREATE,
-        hikari.Embed(title="Reloaded", description="Cleared cached files.", color='#eae9e0'),
+        hikari.Embed(title="Reloaded",
+                     description="Cleared cached files.", color='#eae9e0'),
         flags=hikari.MessageFlag.EPHEMERAL,
     )
     return
+
 
 @tenniel.command
 @lightbulb.command("recommend", "Get a chart recommendation.")
@@ -460,12 +486,12 @@ async def cmd_recom(ctx: lightbulb.SlashCommand) -> None:
         hikari.ResponseType.MESSAGE_CREATE,
         output
     )
-    
+
 
 @cmd_result.autocomplete('chart')
 @cmd_song.autocomplete('chart')
 async def autocomplete_chart(
-    opt: hikari.AutocompleteInteractionOption, 
+    opt: hikari.AutocompleteInteractionOption,
     inter: hikari.AutocompleteInteraction
 ) -> None:
     current_input = opt.value
@@ -473,7 +499,7 @@ async def autocomplete_chart(
     return output
 
 tenniel.run(status=hikari.Status.ONLINE,
-        activity=hikari.Activity(
-            name="Arcaea",
-            type=hikari.ActivityType.PLAYING,
-        ))
+            activity=hikari.Activity(
+                name="Arcaea",
+                type=hikari.ActivityType.PLAYING,
+            ))

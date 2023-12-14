@@ -71,6 +71,11 @@ specials = [
 
 def load_auto():
     arcsong = getArcsong()
+    global global_future
+    global global_beyond
+    global global_past
+    global global_present
+    
     global_past = []
     global_present = []
     global_future = []
@@ -90,6 +95,8 @@ async def chart_autocomplete(query):
     if query == "":
         return featured
 
+    future = global_future
+    beyond = global_beyond
     try:
         cc = float(query)
         if cc < 1.0 or cc > 12.0:
@@ -98,8 +105,6 @@ async def chart_autocomplete(query):
         found_songs = []
 
         if cc >= 7.0:
-            future = global_future
-            beyond = global_beyond
             found_songs += [
                 f"{chart['name_en']} (Future)" 
                 for chart in future 

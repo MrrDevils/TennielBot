@@ -168,7 +168,7 @@ async def search(query, diff_name):
         return 0, output
     else:
         output = await searchDiff(chart, diff)
-        return 1, output, difficulty
+        return 1, output, diff
         
 async def searchConstant(constant):
     """

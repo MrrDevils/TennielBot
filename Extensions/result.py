@@ -134,6 +134,7 @@ async def saveData(player):
 
 
 async def result(chart_name, diff_name, score, user_id, s="True"):
+    score = int(score)
     diff = diff_mapping.get(diff_name, None)
     save = bool(s)
     if diff is None:
@@ -155,8 +156,13 @@ async def result(chart_name, diff_name, score, user_id, s="True"):
     jacket_path = await getJacketPath(song_id, diff, jacket_override)
     rating = await calculate(score, cc)
     score_str = await add_commas_to_number(score)
-    if int(score) == max_score:
-        score_str = f"[{score_str}](https://youtu.be/dQw4w9WgXcQ?si=4hKe4HWjXd5QX3_G)"
+    pm = False
+    pm_minus = -1
+    if score >= 10000000 and max_score != 10000000:
+        pm = True
+        pm_minus = score - max_score
+        if pm_minus == 0:
+            score_str = f"[{score_str}](https://youtu.be/dQw4w9WgXcQ?si=4hKe4HWjXd5QX3_G)"
     
     has_improved = False
     play_rank = -1
@@ -230,6 +236,8 @@ async def result(chart_name, diff_name, score, user_id, s="True"):
         "new_ptt": new_ptt,
         "has_improved": has_improved,
         "play_rank": play_rank,
+        "is_pm": pm,
+        "pm_minus": pm_minus
     }
     return result
 
